@@ -82,13 +82,14 @@ def getUser(spec, token):
 
 def updateUser(spec, token, config):
     data = {
-        'user': config      # config can contain: { 'password': password, 'email': email, 'image': image, 'bio': bio }
+        'user': config  # config can contain: { 'password': password, 'email': email, 'image': image, 'bio': bio }
     }
     resp = requests.put(url=getEndpointURL(spec, "user"), json=data, headers={'Authorization': 'Token ' + token})
     if resp.status_code == 200:
         return resp
     else:
         raise Exception(f"Error code {resp.status_code}: {resp.content}")
+
 
 def getProfile(spec, token, username):
     resp = requests.get(url=getEndpointURL(spec, f"profiles/{username}"), headers={'Authorization': 'Token ' + token})
@@ -97,25 +98,167 @@ def getProfile(spec, token, username):
     else:
         raise Exception(f"Error code {resp.status_code}: {resp.content}")
 
+
 def followUser(spec, token, username):
     data = {}
-    resp = requests.post(url=getEndpointURL(spec, f"profiles/{username}/follow"), json=data, headers={'Authorization': 'Token ' + token})
+    resp = requests.post(url=getEndpointURL(spec, f"profiles/{username}/follow"), json=data,
+                         headers={'Authorization': 'Token ' + token})
     if resp.status_code == 200:
         return resp
     else:
         raise Exception(f"Error code {resp.status_code}: {resp.content}")
 
+
 def unfollowUser(spec, token, username):
-    data = {}
-    resp = requests.delete(url=getEndpointURL(spec, f"profiles/{username}/follow"), json=data, headers={'Authorization': 'Token ' + token})
+    resp = requests.delete(url=getEndpointURL(spec, f"profiles/{username}/follow"),
+                           headers={'Authorization': 'Token ' + token})
     if resp.status_code == 200:
         return resp
     else:
         raise Exception(f"Error code {resp.status_code}: {resp.content}")
+
 
 # Articles API
 
-# TODO
+def createArticle(spec, token, title, description, body):
+    data = {
+        'article': {
+            'title': title,
+            'description': description,
+            'body': body
+        }
+    }
+    resp = requests.post(url=getEndpointURL(spec, "articles"), json=data, headers={'Authorization': 'Token ' + token})
+    if resp.status_code == 200:
+        return resp
+    else:
+        raise Exception(f"Error code {resp.status_code}: {resp.content}")
+
+
+def getArticle(spec, token, slug):
+    resp = requests.get(url=getEndpointURL(spec, f"articles/{slug}"), headers={'Authorization': 'Token ' + token})
+    if resp.status_code == 200:
+        return resp
+    else:
+        raise Exception(f"Error code {resp.status_code}: {resp.content}")
+
+
+def updateArticle(spec, token, slug, config):  # token must correspond to article.author!
+    data = {
+        'article': config  # contains at least one: {'title': title, 'description': desc, 'body': body}
+    }
+    resp = requests.put(url=getEndpointURL(spec, f"articles/{slug}"), json=data,
+                        headers={'Authorization': 'Token ' + token})
+    if resp.status_code == 200:
+        return resp
+    else:
+        raise Exception(f"Error code {resp.status_code}: {resp.content}")
+
+
+def deleteArticle(spec, token, slug):
+    resp = requests.delete(url=getEndpointURL(spec, f"articles/{slug}"), headers={'Authorization': 'Token ' + token})
+    if resp.status_code == 200:
+        return resp
+    else:
+        raise Exception(f"Error code {resp.status_code}: {resp.content}")
+
+
+def favoriteArticle(spec, token, slug):
+    data = {}
+    resp = requests.post(url=getEndpointURL(spec, f"articles/{slug}/favorite"), json=data,
+                         headers={'Authorization': 'Token ' + token})
+    if resp.status_code == 200:
+        return resp
+    else:
+        raise Exception(f"Error code {resp.status_code}: {resp.content}")
+
+
+def unfavoriteArticle(spec, token, slug):
+    resp = requests.delete(url=getEndpointURL(spec, f"articles/{slug}/favorite"),
+                           headers={'Authorization': 'Token ' + token})
+    if resp.status_code == 200:
+        return resp
+    else:
+        raise Exception(f"Error code {resp.status_code}: {resp.content}")
+
+
+def listArticles(spec, token, params):  # params contains at most one of these: {'tag', 'author', 'favorited'}
+    resp = requests.get(url=getEndpointURL(spec, "articles"), headers={'Authorization': 'Token ' + token},
+                        params=params)
+    if resp.status_code == 200:
+        return resp
+    else:
+        raise Exception(f"Error code {resp.status_code}: {resp.content}")
+
+
+def getArticlesFeed(spec, token, params):  # params can contain: {'limit': 20, 'offset': 0}
+    resp = requests.get(url=getEndpointURL(spec, "articles/feed"), headers={'Authorization': 'Token ' + token},
+                        params=params)
+    if resp.status_code == 200:
+        return resp
+    else:
+        raise Exception(f"Error code {resp.status_code}: {resp.content}")
+
+
+def getTags(spec):
+    resp = requests.get(url=getEndpointURL(spec, "tags"))
+    if resp.status_code == 200:
+        return resp
+    else:
+        raise Exception(f"Error code {resp.status_code}: {resp.content}")
+
+
+# Comments API
+
+def createComment(spec, token, slug, body):
+    data = {
+        'comment': {
+            'body': body
+        }
+    }
+    resp = requests.post(url=getEndpointURL(spec, f"articles/{slug}/comments"), json=data,
+                         headers={'Authorization': 'Token ' + token})
+    if resp.status_code == 200:
+        return resp
+    else:
+        raise Exception(f"Error code {resp.status_code}: {resp.content}")
+
+
+def getComments(spec, token, slug):
+    resp = requests.get(url=getEndpointURL(spec, f"articles/{slug}/comments"),
+                        headers={'Authorization': 'Token ' + token})
+    if resp.status_code == 200:
+        return resp
+    else:
+        raise Exception(f"Error code {resp.status_code}: {resp.content}")
+
+
+def deleteComment(spec, token, slug, comment_id):  # token must correspond to comment.author!
+    resp = requests.delete(url=getEndpointURL(spec, f"articles/{slug}/comments/{comment_id}"),
+                           headers={'Authorization': 'Token ' + token})
+    if resp.status_code == 200:
+        return resp
+    else:
+        raise Exception(f"Error code {resp.status_code}: {resp.content}")
+
+
+# Utils API
+
+def ping(spec):
+    resp = requests.get(url=getEndpointURL(spec, "ping"))
+    if resp.status_code == 200:
+        return resp
+    else:
+        raise Exception(f"Error code {resp.status_code}: {resp.content}")
+
+
+def purgeData(spec):
+    resp = requests.delete(url=getEndpointURL(spec, "__TESTUTILS__/purge"))
+    if resp.status_code == 200:
+        return resp
+    else:
+        raise Exception(f"Error code {resp.status_code}: {resp.content}")
+
 
 # SB entry points
 
