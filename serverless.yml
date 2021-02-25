@@ -204,7 +204,6 @@ resources:
 
     UsersDynamoDBTable:
       Type: 'AWS::DynamoDB::Table'
-      DeletionPolicy: Retain
       Properties:
         AttributeDefinitions:
           -
@@ -236,7 +235,6 @@ resources:
 
     ArticlesDynamoDBTable:
       Type: 'AWS::DynamoDB::Table'
-      DeletionPolicy: Retain
       Properties:
         AttributeDefinitions:
           -
@@ -274,7 +272,6 @@ resources:
 
     CommentsDynamoDBTable:
       Type: 'AWS::DynamoDB::Table'
-      DeletionPolicy: Retain
       Properties:
         AttributeDefinitions:
           -

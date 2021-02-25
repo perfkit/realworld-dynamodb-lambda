@@ -10,3 +10,5 @@ coverage
 gh-pages
 .dynamodb
 .idea
+.sb
+__pycache__

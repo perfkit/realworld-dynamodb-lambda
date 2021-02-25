@@ -262,9 +262,10 @@ def purgeData(spec):
 
 # SB entry points
 
+# before first start: run 'npm install'
 def prepare(spec):
     log = spec.run(f"serverless deploy --stage {spec['stage']} --region {spec['region']}", image='serverless_cli')
-    spec['endpoint'] = re.match(r"https://([\w.]+)/", log).group(1)
+    spec['endpoint'] = re.findall(r"https://([-\w.]+)/", log)[-1]
     logging.info(f"service endpoint={spec['endpoint']}")
 
 
