@@ -16,6 +16,27 @@ event_processing:
 def getEndpointURL(spec, postfix):
     return f"https://{spec['endpoint']}/{spec['stage']}/api/{postfix}"
 
+class User:
+    def __init__(self, email, username, password):
+        self.email = email
+        self.username = username
+        self.password = password
+        self.token = None
+
+    def description(self):
+        return f"user {self.username} with email {self.email} and password {self.password}"
+
+    def create(self, spec):
+        logging.info(f"[Creating] {self.description()}.")
+        self.token = createUser(spec, self.username, self.password, self.email).json()['user']['token']
+
+    def login(self, spec):
+        logging.info(f"[Login] {self.description()}.")
+        self.token = loginUser(spec, self.email, self.password).json()['user']['token']
+
+    def get(self, spec):
+        logging.info(f"[Get] {self.description()}.")
+        # TODO
 
 # Endpoints:
 #
@@ -262,7 +283,7 @@ def purgeData(spec):
 
 # SB entry points
 
-# before first start: run 'npm install'
+# before first start: run 'npm install' !
 def prepare(spec):
     log = spec.run(f"serverless deploy --stage {spec['stage']} --region {spec['region']}", image='serverless_cli')
     spec['endpoint'] = re.findall(r"https://([-\w.]+)/", log)[-1]
@@ -270,7 +291,8 @@ def prepare(spec):
 
 
 def invoke(spec):
-    createUser(spec, "username1", "testpass123", "user1@hotmail.com")  # TODO make a complete scenario
+    #logging.info(f"{createUser(spec, 'username1', 'testpass123', 'user1@hotmail.com').content}")  # TODO make a complete scenario
+    logging.info(f"{loginUser(spec,  'user1@hotmail.com', 'testpass123').content}")
 
 
 def cleanup(spec):
