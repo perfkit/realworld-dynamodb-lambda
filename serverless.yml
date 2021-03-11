@@ -33,6 +33,7 @@ functions:
   ## Users API
   createUser:
     handler: src/User.create
+    memorySize: 1024
     events:
       - http:
           method: POST
@@ -41,6 +42,7 @@ functions:
 
   loginUser:
     handler: src/User.login
+    memorySize: 1024
     events:
       - http:
           method: POST
@@ -49,6 +51,7 @@ functions:
 
   getUser:
     handler: src/User.get
+    memorySize: 1024
     events:
       - http:
           method: GET
@@ -57,6 +60,7 @@ functions:
 
   updateUser:
     handler: src/User.update
+    memorySize: 1024
     events:
       - http:
           method: PUT
@@ -65,6 +69,7 @@ functions:
 
   getProfile:
     handler: src/User.getProfile
+    memorySize: 1024
     events:
       - http:
           method: GET
@@ -73,6 +78,7 @@ functions:
 
   followUser:
     handler: src/User.follow
+    memorySize: 1024
     events:
       - http:
           method: POST
@@ -81,6 +87,7 @@ functions:
 
   unfollowUser:
     handler: src/User.follow
+    memorySize: 1024
     events:
       - http:
           method: DELETE
@@ -90,6 +97,7 @@ functions:
   ## Articles API
   createArticle:
     handler: src/Article.create
+    memorySize: 1024
     events:
       - http:
           method: POST
@@ -98,6 +106,7 @@ functions:
 
   getArticle:
     handler: src/Article.get
+    memorySize: 1024
     events:
       - http:
           method: GET
@@ -106,6 +115,7 @@ functions:
 
   udpateArticle:
     handler: src/Article.update
+    memorySize: 1024
     events:
       - http:
           method: PUT
@@ -114,6 +124,7 @@ functions:
 
   deleteArticle:
     handler: src/Article.delete
+    memorySize: 1024
     events:
       - http:
           method: DELETE
@@ -122,6 +133,7 @@ functions:
 
   favoriteArticle:
     handler: src/Article.favorite
+    memorySize: 1024
     events:
       - http:
           method: POST
@@ -130,6 +142,7 @@ functions:
 
   unfavoriteArticle:
     handler: src/Article.favorite
+    memorySize: 1024
     events:
       - http:
           method: DELETE
@@ -138,6 +151,7 @@ functions:
 
   listArticles:
     handler: src/Article.list
+    memorySize: 1024
     events:
       - http:
           method: GET
@@ -146,6 +160,7 @@ functions:
 
   getArticlesFeed:
     handler: src/Article.getFeed
+    memorySize: 1024
     events:
       - http:
           method: GET
@@ -154,6 +169,7 @@ functions:
 
   getTags:
     handler: src/Article.getTags
+    memorySize: 1024
     events:
       - http:
           method: GET
@@ -163,6 +179,7 @@ functions:
   ## Comments API
   createComment:
     handler: src/Comment.create
+    memorySize: 1024
     events:
       - http:
           method: POST
@@ -171,6 +188,7 @@ functions:
 
   getComments:
     handler: src/Comment.get
+    memorySize: 1024
     events:
       - http:
           method: GET
@@ -179,6 +197,7 @@ functions:
 
   deleteComment:
     handler: src/Comment.delete
+    memorySize: 1024
     events:
       - http:
           method: DELETE
@@ -188,6 +207,7 @@ functions:
   ## Utils API
   ping:
     handler: src/Util.ping
+    memorySize: 1024
     events:
       - http:
           method: GET
@@ -196,6 +216,7 @@ functions:
 
   purgeData:
     handler: src/Util.purgeData
+    memorySize: 1024
     events:
       - http: DELETE /api/__TESTUTILS__/purge
 
@@ -216,9 +237,7 @@ resources:
           -
             AttributeName: username
             KeyType: HASH
-        ProvisionedThroughput:
-          ReadCapacityUnits: 1
-          WriteCapacityUnits: 1
+        BillingMode: PAY_PER_REQUEST
         TableName: realworld-${self:provider.environment.DYNAMODB_NAMESPACE}-users
         GlobalSecondaryIndexes:
           -
@@ -229,9 +248,6 @@ resources:
                 KeyType: HASH
             Projection:
               ProjectionType: ALL
-            ProvisionedThroughput:
-              ReadCapacityUnits: 1
-              WriteCapacityUnits: 1
 
     ArticlesDynamoDBTable:
       Type: 'AWS::DynamoDB::Table'
@@ -250,9 +266,7 @@ resources:
           -
             AttributeName: slug
             KeyType: HASH
-        ProvisionedThroughput:
-          ReadCapacityUnits: 1
-          WriteCapacityUnits: 1
+        BillingMode: PAY_PER_REQUEST
         TableName: realworld-${self:provider.environment.DYNAMODB_NAMESPACE}-articles
         GlobalSecondaryIndexes:
           -
@@ -266,9 +280,6 @@ resources:
                 KeyType: RANGE
             Projection:
               ProjectionType: ALL
-            ProvisionedThroughput:
-              ReadCapacityUnits: 1
-              WriteCapacityUnits: 1
 
     CommentsDynamoDBTable:
       Type: 'AWS::DynamoDB::Table'
@@ -284,9 +295,7 @@ resources:
           -
             AttributeName: id
             KeyType: HASH
-        ProvisionedThroughput:
-          ReadCapacityUnits: 1
-          WriteCapacityUnits: 1
+        BillingMode: PAY_PER_REQUEST
         TableName: realworld-${self:provider.environment.DYNAMODB_NAMESPACE}-comments
         GlobalSecondaryIndexes:
           -
@@ -297,6 +306,3 @@ resources:
                 KeyType: HASH
             Projection:
               ProjectionType: ALL
-            ProvisionedThroughput:
-              ReadCapacityUnits: 1
-              WriteCapacityUnits: 1

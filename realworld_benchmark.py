@@ -22,6 +22,12 @@ class User:
         self.username = username
         self.password = password
         self.token = None
+        self.image = None
+        self.bio = None
+        self.followed = []
+        self.article_slugs = []     # articles created by user
+        self.favorite_slugs = []    # articles favd by user
+        self.comments = []  # stores tuples (slug, commend_id)
 
     def description(self):
         return f"user {self.username} with email {self.email} and password {self.password}"
@@ -36,7 +42,86 @@ class User:
 
     def get(self, spec):
         logging.info(f"[Get] {self.description()}.")
-        # TODO
+        return getUser(spec, self.token).json()
+
+    def update(self, spec, config):     # { 'password': password, 'email': email, 'image': image, 'bio': bio }
+        logging.info(f"[Update] {self.description()}.")
+        updateUser(spec, self.token, config)
+        if 'password' in config:
+            self.password = config['password']
+        if 'email' in config:
+            self.email = config['email']
+        if 'image' in config:
+            self.image = config['image']
+        if 'bio' in config:
+            self.bio = config['bio']
+
+    def getProf(self, spec, username):
+        logging.info(f"[GetProfile] {self.description()}.")
+        logging.info(getProfile(spec, self.token, username).json())
+
+    def followProf(self, spec, username):
+        logging.info(f"[FollowProfile] {self.description()}.")
+        followUser(spec, self.token, username)
+        self.followed.append(username)
+
+    def unfollowProf(self, spec, username):
+        logging.info(f"[UnfollowProfile] {self.description()}.")
+        unfollowUser(spec, self.token, username)
+        self.followed.remove(username)
+
+    def createArt(self, spec, title, description, body):
+        logging.info(f"[CreateArticle] {self.description()}.")
+        slug = createArticle(spec, self.token, title, description, body).json()['article']['slug']
+        self.article_slugs.append(slug)
+        return slug
+
+    def getArt(self, spec, slug):
+        logging.info(f"[GetArticle] {self.description()}.")
+        logging.info(getArticle(spec, self.token, slug).json())
+
+    def updateArt(self, spec, slug, config):    # {'title': title, 'description': desc, 'body': body}
+        logging.info(f"[UpdateArticle] {self.description()}.")
+        updateArticle(spec, self.token, slug, config)
+
+    def deleteArt(self, spec, slug):
+        logging.info(f"[DeleteArticle] {self.description()}.")
+        deleteArticle(spec, self.token, slug)
+        self.article_slugs.remove(slug)
+
+    def favArt(self, spec, slug):
+        logging.info(f"[FavoriteArticle] {self.description()}.")
+        favoriteArticle(spec, self.token, slug)
+        self.favorite_slugs.append(slug)
+
+    def unfavArt(self, spec, slug):
+        logging.info(f"[UnfavoriteArticle] {self.description()}.")
+        unfavoriteArticle(spec, self.token, slug)
+        self.favorite_slugs.remove(slug)
+
+    def listArts(self, spec, config):   # {'tag': '...', 'author': '...', 'favorited': '...'}
+        logging.info(f"[ListArticles] {self.description()}.")
+        logging.info(listArticles(spec, self.token, config).json())
+
+    def getArtFeed(self, spec, config):     # {'limit': 20, 'offset': 0}
+        logging.info(f"[GetArticlesFeed] {self.description()}.")
+        logging.info(getArticlesFeed(spec, self.token, config).json())
+
+    def getArtTags(self, spec):
+        logging.info(f"[GetTags] {self.description()}.")
+        logging.info(getTags(spec).json())
+
+    def createComm(self, spec, slug, body):
+        logging.info(f"[CreateComment] {self.description()}.")
+        self.comments.append((slug, createComment(spec, self.token, slug, body).json()['comment']['id']))
+
+    def getComms(self, spec, slug):
+        logging.info(f"[GetComments] {self.description()}.")
+        logging.info(getComments(spec, self.token, slug).json())
+
+    def delComm(self, spec, slug, comment_id):
+        logging.info(f"[DeleteComment] {self.description()}.")
+        deleteComment(spec, self.token, slug, comment_id)
 
 # Endpoints:
 #
@@ -291,8 +376,33 @@ def prepare(spec):
 
 
 def invoke(spec):
-    #logging.info(f"{createUser(spec, 'username1', 'testpass123', 'user1@hotmail.com').content}")  # TODO make a complete scenario
-    logging.info(f"{loginUser(spec,  'user1@hotmail.com', 'testpass123').content}")
+    ping(spec)
+    purgeData(spec)
+    user1 = User("testmail1@gmail.com", "username1", "password1")
+    user2 = User("testmail2@hotmail.com", "username2", "password2")
+    user1.create(spec)
+    user2.create(spec)
+    user1.login(spec)
+    user2.login(spec)
+    user1.update(spec, {'bio': 'testbio1'})
+    user2.update(spec, {'bio': 'testbio2'})
+    print(user1.get(spec).json())
+    print(user2.get(spec).json())
+    user1.getProf(spec, user2.username)
+    user1.followProf(spec, user2.username)
+    slug = user2.createArt(spec, "test title", "test description", "test body")
+    user2.getArt(spec, slug)
+    user2.updateArt(spec, slug, {'body': 'updated test body'})
+    print(user1.getArtFeed(spec, {'limit': 10, 'offset': 0}).json())
+    user1.favArt(spec, slug)
+    user1.unfavArt(spec, slug)
+    user1.createComm(spec, slug, "comment body")
+    user1.getComms(spec, slug)
+    user2.listArts(spec, {'author': user2.username})
+    user2.getArtTags(spec)
+    user1.delComm(spec, slug, user1.comments[0])
+    user1.unfollowProf(spec, user2.username)
+    user2.deleteArt(spec, slug)
 
 
 def cleanup(spec):
